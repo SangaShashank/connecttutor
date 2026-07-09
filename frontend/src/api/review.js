@@ -1,4 +1,6 @@
-const REVIEW_URL = 'http://localhost:5000/api/reviews';
+//const REVIEW_URL = 'http://localhost:5000/api/reviews';
+import { API_BASE_URL } from '../config';
+const REVIEW_URL = `${API_BASE_URL}/api/reviews`;
 
 export const getTutorReviews = async (tutorUserId) => {
   const response = await fetch(`${REVIEW_URL}/tutor/${tutorUserId}`);

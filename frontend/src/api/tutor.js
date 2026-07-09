@@ -1,5 +1,8 @@
-const API_URL = 'http://localhost:5000/api/tutors';
-const BOOKING_URL = 'http://localhost:5000/api/bookings';
+//const API_URL = 'http://localhost:5000/api/tutors';
+//const BOOKING_URL = 'http://localhost:5000/api/bookings';
+import { API_BASE_URL } from '../config';
+const API_URL = `${API_BASE_URL}/api/tutors`;
+const BOOKING_URL = `${API_BASE_URL}/api/bookings`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
