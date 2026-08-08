@@ -24,9 +24,10 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });*/
+const dotenv = require('dotenv');
+dotenv.config();
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes'); // ← NEW: add this line here
 const tutorRoutes = require('./routes/tutorRoutes');
@@ -34,7 +35,6 @@ const bookingRoutes = require('./routes/bookingRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 
 
-dotenv.config();
 
 const app = express();
 

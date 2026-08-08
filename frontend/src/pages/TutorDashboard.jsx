@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { getMyTutorProfile, getIncomingBookings, updateBookingStatus } from '../api/tutor'
 import TutorProfileForm from '../components/TutorProfileForm'
 import Navbar from '../components/Navbar'
+import SubjectChip from '../components/SubjectChip'
 
 function TutorDashboard() {
   const [profile, setProfile] = useState(null)
-  const [profileExists, setProfileExists] = useState(true) // assume true until proven false
+  const [profileExists, setProfileExists] = useState(true)
   const [bookings, setBookings] = useState([])
   const [showForm, setShowForm] = useState(false)
 
@@ -21,7 +22,7 @@ function TutorDashboard() {
       setShowForm(false)
     } catch (err) {
       setProfileExists(false)
-      setShowForm(true) // no profile yet, show the form immediately
+      setShowForm(true)
     }
 
     try {
@@ -41,88 +42,92 @@ function TutorDashboard() {
     }
   }
 
- return (
-    <div className="min-h-screen bg-gray-100">
-      <Navbar />
-      <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Tutor Dashboard</h1>
+  const statusStyles = {
+    pending: 'bg-amber/20 text-amber-900',
+    accepted: 'bg-sage/15 text-sage',
+    rejected: 'bg-brick/10 text-brick'
+  }
 
-      {/* Profile Section */}
-      <div className="bg-white p-6 rounded-lg shadow mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">My Profile</h2>
-          {profileExists && (
-            <button
-              onClick={() => setShowForm(!showForm)}
-              className="text-blue-600 hover:underline text-sm"
-            >
-              {showForm ? 'Cancel' : 'Edit Profile'}
-            </button>
+  return (
+    <div className="min-h-screen bg-cream">
+      <Navbar />
+      <div className="p-6 md:p-10 max-w-4xl mx-auto">
+        <h1 className="font-display text-3xl font-semibold text-navy mb-8">Tutor Dashboard</h1>
+
+        {/* Profile Section */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-navy/5 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="font-display text-xl font-semibold text-navy">My Profile</h2>
+            {profileExists && (
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="text-navy text-sm font-medium hover:text-amber transition-colors"
+              >
+                {showForm ? 'Cancel' : 'Edit Profile'}
+              </button>
+            )}
+          </div>
+
+          {!profileExists && !showForm && (
+            <p className="text-charcoal/50 text-sm">No profile found. Please create one.</p>
+          )}
+
+          {showForm && (
+            <TutorProfileForm existingProfile={profile} onSuccess={loadDashboardData} />
+          )}
+
+          {!showForm && profile && (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {profile.subjects.map((s) => <SubjectChip key={s} subject={s} />)}
+              </div>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Mode:</strong> {profile.mode.join(', ')}</p>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Hourly Rate:</strong> ₹{profile.hourlyRate}</p>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Bio:</strong> {profile.bio}</p>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Rating:</strong> {profile.rating} ⭐</p>
+            </div>
           )}
         </div>
 
-        {!profileExists && !showForm && (
-          <p className="text-gray-500">No profile found. Please create one.</p>
-        )}
+        {/* Bookings Section */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-navy/5">
+          <h2 className="font-display text-xl font-semibold text-navy mb-4">Incoming Booking Requests</h2>
+          {bookings.length === 0 && <p className="text-charcoal/50 text-sm">No requests yet.</p>}
 
-        {showForm && (
-          <TutorProfileForm
-            existingProfile={profile}
-            onSuccess={loadDashboardData}
-          />
-        )}
-
-        {!showForm && profile && (
-          <div>
-            <p><strong>Subjects:</strong> {profile.subjects.join(', ')}</p>
-            <p><strong>Mode:</strong> {profile.mode.join(', ')}</p>
-            <p><strong>Hourly Rate:</strong> ₹{profile.hourlyRate}</p>
-            <p><strong>Bio:</strong> {profile.bio}</p>
-            <p><strong>Rating:</strong> {profile.rating} ⭐</p>
-          </div>
-        )}
-      </div>
-
-      {/* Bookings Section (unchanged) */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Incoming Booking Requests</h2>
-        {bookings.length === 0 && <p className="text-gray-500">No requests yet.</p>}
-        {bookings.map((booking) => (
-          <div key={booking._id} className="border-b py-4 last:border-0">
-            <p><strong>Student:</strong> {booking.studentId.name}</p>
-            <p><strong>Subject:</strong> {booking.subject}</p>
-            <p><strong>Mode:</strong> {booking.preferredMode}</p>
-            <p><strong>Message:</strong> {booking.message}</p>
-            <p>
-              <strong>Status:</strong>{' '}
-              <span className={
-                booking.status === 'pending' ? 'text-yellow-600' :
-                booking.status === 'accepted' ? 'text-green-600' :
-                'text-red-600'
-              }>
-                {booking.status}
-              </span>
-            </p>
-            {booking.status === 'pending' && (
-              <div className="mt-2 space-x-2">
-                <button
-                  onClick={() => handleStatusUpdate(booking._id, 'accepted')}
-                  className="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-                >
-                  Accept
-                </button>
-                <button
-                  onClick={() => handleStatusUpdate(booking._id, 'rejected')}
-                  className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700"
-                >
-                  Reject
-                </button>
+          {bookings.map((booking) => (
+            <div key={booking._id} className="border-b border-navy/5 py-4 last:border-0">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <p className="font-semibold text-charcoal">{booking.studentId.name}</p>
+                  <SubjectChip subject={booking.subject} />
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusStyles[booking.status]}`}>
+                  {booking.status}
+                </span>
               </div>
-            )}
-          </div>
-        ))}
+              <p className="text-sm text-charcoal/70 mt-2"><strong className="text-charcoal">Mode:</strong> {booking.preferredMode}</p>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Message:</strong> {booking.message}</p>
+
+              {booking.status === 'pending' && (
+                <div className="mt-3 space-x-2">
+                  <button
+                    onClick={() => handleStatusUpdate(booking._id, 'accepted')}
+                    className="bg-sage text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-sage/90 transition-colors"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleStatusUpdate(booking._id, 'rejected')}
+                    className="bg-brick text-white px-4 py-1.5 rounded-full text-sm font-medium hover:bg-brick/90 transition-colors"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   )
 }

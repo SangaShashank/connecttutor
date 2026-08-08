@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { searchTutors } from '../api/tutor'
 import Navbar from '../components/Navbar'
+import SubjectChip from '../components/SubjectChip'
 
 function SearchTutors() {
   const [tutors, setTutors] = useState([])
@@ -41,79 +42,65 @@ function SearchTutors() {
     loadTutorsWithFilters(trimmedFilters)
   }
 
- return (
-    <div className="min-h-screen bg-gray-100">
+  const inputClass = "p-2.5 border border-navy/10 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber/50 focus:border-amber transition-all"
+
+  return (
+    <div className="min-h-screen bg-cream">
       <Navbar />
-      <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Find a Tutor</h1>
-      <form onSubmit={handleSearch} className="bg-white p-6 rounded-lg shadow mb-6 grid grid-cols-2 md:grid-cols-5 gap-4">
-        <input
-          type="text"
-          name="subject"
-          placeholder="Subject"
-          value={filters.subject}
-          onChange={handleChange}
-          className="p-2 border rounded"
-        />
-        <select name="mode" value={filters.mode} onChange={handleChange} className="p-2 border rounded">
-          <option value="">Any Mode</option>
-          <option value="home">Home</option>
-          <option value="online">Online</option>
-          <option value="group">Group</option>
-        </select>
-        <input
-          type="text"
-          name="location"
-          placeholder="Location"
-          value={filters.location}
-          onChange={handleChange}
-          className="p-2 border rounded"
-        />
-        <input
-          type="number"
-          name="minPrice"
-          placeholder="Min ₹/hr"
-          value={filters.minPrice}
-          onChange={handleChange}
-          className="p-2 border rounded"
-        />
-        <input
-          type="number"
-          name="maxPrice"
-          placeholder="Max ₹/hr"
-          value={filters.maxPrice}
-          onChange={handleChange}
-          className="p-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="col-span-2 md:col-span-5 bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Search
-        </button>
-      </form>
+      <div className="p-6 md:p-10 max-w-5xl mx-auto">
+        <h1 className="font-display text-3xl font-semibold text-navy mb-8">Find a Tutor</h1>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {tutors.length === 0 && <p className="text-gray-500">No tutors found.</p>}
+        <form onSubmit={handleSearch} className="bg-white p-6 rounded-2xl shadow-sm border border-navy/5 mb-8 grid grid-cols-2 md:grid-cols-5 gap-3">
+          <input type="text" name="subject" placeholder="Subject" value={filters.subject} onChange={handleChange} className={inputClass} />
+          <select name="mode" value={filters.mode} onChange={handleChange} className={inputClass}>
+            <option value="">Any Mode</option>
+            <option value="home">Home</option>
+            <option value="online">Online</option>
+            <option value="group">Group</option>
+          </select>
+          <input type="text" name="location" placeholder="Location" value={filters.location} onChange={handleChange} className={inputClass} />
+          <input type="number" name="minPrice" placeholder="Min ₹/hr" value={filters.minPrice} onChange={handleChange} className={inputClass} />
+          <input type="number" name="maxPrice" placeholder="Max ₹/hr" value={filters.maxPrice} onChange={handleChange} className={inputClass} />
+          <button
+            type="submit"
+            className="col-span-2 md:col-span-5 bg-navy text-cream p-2.5 rounded-lg font-semibold hover:bg-navy-dark transition-colors"
+          >
+            Search
+          </button>
+        </form>
 
-        {tutors.map((tutor) => (
-          <div key={tutor._id} className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold">{tutor.userId.name}</h3>
-            <p className="text-sm text-gray-600">{tutor.userId.location}</p>
-            <p><strong>Subjects:</strong> {tutor.subjects.join(', ')}</p>
-            <p><strong>Mode:</strong> {tutor.mode.join(', ')}</p>
-            <p><strong>Rate:</strong> ₹{tutor.hourlyRate}/hr</p>
-            <p><strong>Rating:</strong> {tutor.rating} ⭐</p>
-            <Link
-              to={`/tutor/${tutor._id}`}
-              className="inline-block mt-2 text-blue-600 hover:underline text-sm"
-            >
-              View Profile →
-            </Link>
-          </div>
-        ))}
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {tutors.length === 0 && <p className="text-charcoal/50 text-sm col-span-full">No tutors found.</p>}
+
+          {tutors.map((tutor) => (
+            <div key={tutor._id} className="bg-white p-5 rounded-2xl shadow-sm border border-navy/5 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-3 mb-1">
+                {tutor.userId.profilePhoto ? (
+                  <img src={tutor.userId.profilePhoto} alt={tutor.userId.name} className="w-10 h-10 rounded-full object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center text-navy font-semibold">
+                    {tutor.userId.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <h3 className="font-display text-lg font-semibold text-navy">{tutor.userId.name}</h3>
+              </div>
+              <p className="text-xs text-charcoal/50 mb-3">{tutor.userId.location}</p>
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {tutor.subjects.map((s) => <SubjectChip key={s} subject={s} />)}
+              </div>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Mode:</strong> {tutor.mode.join(', ')}</p>
+              <p className="text-sm text-charcoal/70"><strong className="text-charcoal">Rate:</strong> ₹{tutor.hourlyRate}/hr</p>
+              <p className="text-sm text-charcoal/70 mb-3"><strong className="text-charcoal">Rating:</strong> {tutor.rating} ⭐</p>
+              <Link
+                to={`/tutor/${tutor._id}`}
+                className="inline-block text-navy text-sm font-medium hover:text-amber transition-colors"
+              >
+                View Profile →
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   )
 }

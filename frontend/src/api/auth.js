@@ -33,3 +33,21 @@ export const signupUser = async (userData) => {
 
   return data; // { token, user }
 };
+export const uploadProfilePhoto = async (file) => {
+  const token = localStorage.getItem('token');
+  const formData = new FormData();
+  formData.append('photo', file);
+
+  const response = await fetch(`${API_URL}/upload-photo`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`
+      // Note: no Content-Type header here — browser sets it automatically for FormData, including the correct boundary string
+    },
+    body: formData
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message);
+  return data;
+};

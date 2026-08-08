@@ -69,7 +69,7 @@ const updateProfile = async (req, res) => {
 // View any tutor's public profile (no auth needed — students browse this)
 const getTutorById = async (req, res) => {
   try {
-    const profile = await TutorProfile.findById(req.params.id).populate('userId', 'name location');
+    const profile = await TutorProfile.findById(req.params.id).populate('userId', 'name location profilePhoto');
 
     if (!profile) {
       return res.status(404).json({ message: 'Tutor not found' });
@@ -105,7 +105,7 @@ const searchTutors = async (req, res) => {
       if (maxPrice) filter.hourlyRate.$lte = Number(maxPrice);
     }
 
-    const tutors = await TutorProfile.find(filter).populate('userId', 'name location');
+    const tutors = await TutorProfile.find(filter).populate('userId', 'name location profilePhoto');
 
     res.json(tutors);
   } catch (error) {
