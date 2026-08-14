@@ -2,13 +2,17 @@ import { useState, useEffect } from 'react'
 import { getMyTutorProfile, getIncomingBookings, updateBookingStatus } from '../api/tutor'
 import TutorProfileForm from '../components/TutorProfileForm'
 import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 import SubjectChip from '../components/SubjectChip'
+import ChatBox from '../components/ChatBox'
 
 function TutorDashboard() {
   const [profile, setProfile] = useState(null)
   const [profileExists, setProfileExists] = useState(true)
   const [bookings, setBookings] = useState([])
   const [showForm, setShowForm] = useState(false)
+  const [activeChatBookingId, setActiveChatBookingId] = useState(null)
+  const currentUser = JSON.parse(localStorage.getItem('user'))
 
   useEffect(() => {
     loadDashboardData()
@@ -124,10 +128,30 @@ function TutorDashboard() {
                   </button>
                 </div>
               )}
+              {(booking.status === 'accepted' || booking.status === 'completed') && (
+                <button
+                  onClick={() => setActiveChatBookingId(booking._id)}
+                  className="mt-3 text-navy text-sm font-medium hover:text-amber transition-colors"
+                >
+                  💬 Chat
+                </button>
+              )}
             </div>
           ))}
         </div>
       </div>
+
+      {activeChatBookingId && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <ChatBox
+            bookingId={activeChatBookingId}
+            currentUserId={currentUser.id}
+            onClose={() => setActiveChatBookingId(null)}
+          />
+        </div>
+      )}
+
+      <Footer />
     </div>
   )
 }

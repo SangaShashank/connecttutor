@@ -126,6 +126,7 @@ export default Signup*/
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { signupUser } from '../api/auth'
+import Footer from '../components/Footer'
 
 function Signup() {
   const [formData, setFormData] = useState({
@@ -214,6 +215,7 @@ function Signup() {
           </p>
         </form>
       </div>
+      <Footer />
     </div>
   )
 }

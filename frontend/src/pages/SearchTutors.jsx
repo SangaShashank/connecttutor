@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { searchTutors } from '../api/tutor'
 import Navbar from '../components/Navbar'
 import SubjectChip from '../components/SubjectChip'
-
+import Footer from '../components/Footer'
 function SearchTutors() {
   const [tutors, setTutors] = useState([])
   const [filters, setFilters] = useState({
@@ -101,6 +101,7 @@ function SearchTutors() {
           ))}
         </div>
       </div>
+    <Footer />
     </div>
   )
 }

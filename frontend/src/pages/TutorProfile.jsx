@@ -4,6 +4,7 @@ import { getTutorById, createBooking } from '../api/tutor'
 import { getTutorReviews } from '../api/review'
 import Navbar from '../components/Navbar'
 import SubjectChip from '../components/SubjectChip'
+import Footer from '../components/Footer'
 
 function TutorProfile() {
   const { id } = useParams()
@@ -146,6 +147,7 @@ function TutorProfile() {
           ))}
         </div>
       </div>
+      <Footer /> 
     </div>
   )
 }

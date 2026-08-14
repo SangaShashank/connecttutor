@@ -78,6 +78,7 @@ export default Login*/
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { loginUser } from '../api/auth'
+import Footer from '../components/Footer'
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -156,6 +157,7 @@ function Login() {
           </p>
         </form>
       </div>
+      <Footer />
     </div>
   )
 }
