@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import SubjectChip from '../components/SubjectChip'
 import ChatBox from '../components/ChatBox'
+import { socket } from '../socket'
 
 function TutorDashboard() {
   const [profile, setProfile] = useState(null)
@@ -12,11 +13,31 @@ function TutorDashboard() {
   const [bookings, setBookings] = useState([])
   const [showForm, setShowForm] = useState(false)
   const [activeChatBookingId, setActiveChatBookingId] = useState(null)
+  const [unreadMap, setUnreadMap] = useState({})
   const currentUser = JSON.parse(localStorage.getItem('user'))
 
   useEffect(() => {
     loadDashboardData()
   }, [])
+
+  // Join rooms for all chat-eligible bookings, and listen globally for new messages
+  useEffect(() => {
+    const chatEligible = bookings.filter(
+      (b) => b.status === 'accepted' || b.status === 'completed'
+    )
+    chatEligible.forEach((b) => socket.emit('join_room', b._id))
+
+    const handleReceive = (message) => {
+      const isMine = message.senderId._id === currentUser.id || message.senderId === currentUser.id
+      const isOpenChat = message.bookingId === activeChatBookingId
+      if (!isMine && !isOpenChat) {
+        setUnreadMap((prev) => ({ ...prev, [message.bookingId]: true }))
+      }
+    }
+
+    socket.on('receive_message', handleReceive)
+    return () => socket.off('receive_message', handleReceive)
+  }, [bookings, activeChatBookingId])
 
   const loadDashboardData = async () => {
     try {
@@ -46,6 +67,11 @@ function TutorDashboard() {
     }
   }
 
+  const openChat = (bookingId) => {
+    setActiveChatBookingId(bookingId)
+    setUnreadMap((prev) => ({ ...prev, [bookingId]: false }))
+  }
+
   const statusStyles = {
     pending: 'bg-amber/20 text-amber-900',
     accepted: 'bg-sage/15 text-sage',
@@ -58,7 +84,6 @@ function TutorDashboard() {
       <div className="p-6 md:p-10 max-w-4xl mx-auto">
         <h1 className="font-display text-3xl font-semibold text-navy mb-8">Tutor Dashboard</h1>
 
-        {/* Profile Section */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-navy/5 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-display text-xl font-semibold text-navy">My Profile</h2>
@@ -93,7 +118,6 @@ function TutorDashboard() {
           )}
         </div>
 
-        {/* Bookings Section */}
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-navy/5">
           <h2 className="font-display text-xl font-semibold text-navy mb-4">Incoming Booking Requests</h2>
           {bookings.length === 0 && <p className="text-charcoal/50 text-sm">No requests yet.</p>}
@@ -130,10 +154,13 @@ function TutorDashboard() {
               )}
               {(booking.status === 'accepted' || booking.status === 'completed') && (
                 <button
-                  onClick={() => setActiveChatBookingId(booking._id)}
-                  className="mt-3 text-navy text-sm font-medium hover:text-amber transition-colors"
+                  onClick={() => openChat(booking._id)}
+                  className="mt-3 text-navy text-sm font-medium hover:text-amber transition-colors flex items-center gap-1.5"
                 >
                   💬 Chat
+                  {unreadMap[booking._id] && (
+                    <span className="w-2 h-2 rounded-full bg-brick inline-block"></span>
+                  )}
                 </button>
               )}
             </div>
